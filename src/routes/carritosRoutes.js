@@ -20,9 +20,9 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const carrito = await carritosController.crearCarrito(req, res);
-        io.emit('carrito-creado', carrito); // Emitir evento de WebSocket
+        io.emit('carrito-creado', carrito);
         console.log('Evento carrito-creado emitido:', carrito);
-        res.status(201).json(carrito); // Devuelve el carrito creado
+        res.status(201).json(carrito);
     } catch (error) {
         console.error('Error al crear el carrito:', error);
         res.status(500).send('Error al crear el carrito');
@@ -32,9 +32,9 @@ router.post('/', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     try {
         const carritoEliminado = await carritosController.eliminarCarrito(req, res);
-        io.emit('carrito-eliminado', carritoEliminado); // Emitir evento de WebSocket
+        io.emit('carrito-eliminado', carritoEliminado);
         console.log('Evento carrito-eliminado emitido:', carritoEliminado);
-        res.status(200).json(carritoEliminado); // Devuelve el carrito eliminado
+        res.status(200).json(carritoEliminado);
     } catch (error) {
         console.error('Error al eliminar el carrito:', error);
         res.status(500).send('Error al eliminar el carrito');

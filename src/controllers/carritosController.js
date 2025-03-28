@@ -6,16 +6,15 @@ class CarritosController {
 
     async listarCarritos(req, res) {
         try {
-            const carritos = await this.carritoModel.find(); // Obtiene los carritos
-            const productos = await this.productoModel.find(); // Obtiene los productos existentes
+            const carritos = await this.carritoModel.find();
+            const productos = await this.productoModel.find();
     
-            // Calcula el total por producto en cada carrito
             const carritosConTotales = carritos.map(carrito => ({
                 ...carrito.toObject(),
                 productos: carrito.productos.map(producto => ({
                     ...producto,
-                    total: producto.precio * producto.cantidad, // Calcula el total por producto
-                    nombre: producto.nombre // Asegúrate de incluir el nombre
+                    total: producto.precio * producto.cantidad,
+                    nombre: producto.nombre 
                 }))
             }));
     
@@ -27,7 +26,7 @@ class CarritosController {
     }
 
     async crearCarrito(req, res) {
-        const { productos } = req.body; // Array de productos con código y cantidad
+        const { productos } = req.body;
         try {
             const productosSeleccionados = await Promise.all(
                 productos.map(async (p) => {

@@ -37,7 +37,7 @@ const productoSchema = new mongoose.Schema({
         trim: true
     },
     thumbnails: {
-        type: [String], // Array de strings para las imágenes
+        type: [String],
         default: []
     },
     fechaCreacion: {

@@ -5,7 +5,7 @@ class ProductosController {
 
     async listarProductos(req, res) {
         try {
-            const productos = await this.productoModel.find(); // Obtiene los productos de la base de datos
+            const productos = await this.productoModel.find();
             res.render('productos/listar', { titulo: 'Lista de Productos', productos });
         } catch (error) {
             console.error('Error en listarProductos:', error);
@@ -16,7 +16,7 @@ class ProductosController {
     async agregarProducto(req, res) {
         const { title, description, code, price, stock, category, thumbnails } = req.body;
 
-        console.log('Valor de thumbnails:', thumbnails); // Depuración
+        console.log('Valor de thumbnails:', thumbnails);
 
         const thumbnailsArray = thumbnails
             ? Array.isArray(thumbnails)
@@ -67,7 +67,7 @@ class ProductosController {
             const productoActualizado = await this.productoModel.findOneAndUpdate(
                 { code },
                 datosActualizados,
-                { new: true } // Devuelve el producto actualizado
+                { new: true }
             );
             if (!productoActualizado) {
                 return res.status(404).send('Producto no encontrado');

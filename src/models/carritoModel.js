@@ -24,7 +24,7 @@ const productoSchema = new mongoose.Schema({
 });
 
 const carritoSchema = new mongoose.Schema({
-    productos: [productoSchema], // Array de productos
+    productos: [productoSchema],
     total: {
         type: Number,
         default: 0

@@ -1,7 +1,7 @@
 import express from 'express';
 import ProductosController from '../controllers/productosController.js';
 import Producto from '../models/productoModel.js';
-import { io } from '../app.js'; // Importar Socket.IO
+import { io } from '../app.js';
 
 const router = express.Router();
 const productosController = new ProductosController(Producto);
@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const producto = await productosController.agregarProducto(req, res);
-        io.emit('producto-agregado', producto); // Emitir evento de WebSocket
+        io.emit('producto-agregado', producto);
         res.status(201).send('Producto agregado');
     } catch (error) {
         console.error('Error al agregar producto:', error);
@@ -30,7 +30,7 @@ router.post('/', async (req, res) => {
 router.delete('/:code', async (req, res) => {
     try {
         const productoEliminado = await productosController.eliminarProducto(req, res);
-        io.emit('producto-eliminado', productoEliminado); // Emitir evento de WebSocket
+        io.emit('producto-eliminado', productoEliminado);
         res.status(200).send('Producto eliminado');
     } catch (error) {
         console.error('Error al eliminar producto:', error);
@@ -41,7 +41,7 @@ router.delete('/:code', async (req, res) => {
 router.put('/:code', async (req, res) => {
     try {
         const productoActualizado = await productosController.modificarProducto(req, res);
-        io.emit('producto-modificado', productoActualizado); // Emitir evento de WebSocket
+        io.emit('producto-modificado', productoActualizado);
         res.status(200).send('Producto modificado');
     } catch (error) {
         console.error('Error al modificar producto:', error);

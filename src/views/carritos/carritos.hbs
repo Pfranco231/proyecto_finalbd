@@ -1,7 +1,6 @@
 <div class="container mt-5">
     <h1 class="text-center mb-4">Gestión de Carritos</h1>
-
-    <!-- Lista de carritos -->
+    
     <ul id="carritos-lista" class="list-group">
         {{#each carritos}}
         <li id="carrito-{{_id}}" class="list-group-item">
@@ -19,7 +18,6 @@
         {{/each}}
     </ul>
 
-    <!-- Formulario para crear carritos -->
     <h2 class="mt-5">Crear Carrito</h2>
     <form id="form-crear-carrito" class="row g-3">
         <div class="col-12">
@@ -45,7 +43,6 @@
 <script>
     const socket = io();
 
-    // Verificar conexión con el servidor de WebSockets
     socket.on('connect', () => {
         console.log('Conectado al servidor de WebSockets:', socket.id);
     });
@@ -54,7 +51,6 @@
         console.log('Desconectado del servidor de WebSockets');
     });
 
-    // Escuchar eventos de WebSocket
     socket.on('carrito-creado', (carrito) => {
         console.log('Evento carrito-creado recibido:', carrito);
         const lista = document.getElementById('carritos-lista');
@@ -82,7 +78,6 @@
         }
     });
 
-    // Manejar creación de carritos
     const formCrearCarrito = document.getElementById('form-crear-carrito');
     formCrearCarrito.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -111,7 +106,6 @@
         }
     });
 
-    // Manejar eliminación de carritos
     document.addEventListener('click', async (e) => {
         if (e.target.classList.contains('eliminar-carrito')) {
             const id = e.target.dataset.id;

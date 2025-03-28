@@ -2,7 +2,6 @@
 <div class="container mt-5">
     <h1 class="text-center mb-4">{{titulo}}</h1>
 
-    <!-- Lista de productos -->
     <div class="row">
         {{#each productos}}
         <div class="col-md-4 mb-4">
@@ -23,7 +22,6 @@
         {{/each}}
     </div>
 
-    <!-- Formulario para agregar productos -->
     <h2 class="mt-5">Agregar Producto</h2>
     <form id="form-agregar-producto" class="row g-3">
         <div class="col-md-6">
@@ -67,8 +65,7 @@
 socket.on('producto-agregado', (producto) => {
         console.log('Evento producto-agregado recibido:', producto);
 
-        // Selecciona el contenedor de productos
-        const lista = document.querySelector('.row'); // Asegúrate de que este selector coincida con el contenedor en tu HTML
+        const lista = document.querySelector('.row');
         const nuevoProducto = document.createElement('div');
         nuevoProducto.classList.add('col-md-4', 'mb-4');
         nuevoProducto.innerHTML = `
@@ -92,7 +89,6 @@ socket.on('producto-agregado', (producto) => {
     socket.on('producto-eliminado', (producto) => {
         console.log('Evento producto-eliminado recibido:', producto);
 
-        // Selecciona el producto por su código
         const productoElemento = document.querySelector(`[data-code="${producto.code}"]`).closest('.col-md-4');
         if (productoElemento) {
             productoElemento.remove();
@@ -103,7 +99,6 @@ socket.on('producto-agregado', (producto) => {
     socket.on('producto-modificado', (producto) => {
         console.log('Evento producto-modificado recibido:', producto);
 
-        // Selecciona el producto por su código
         const productoElemento = document.querySelector(`[data-code="${producto.code}"]`).closest('.col-md-4');
         if (productoElemento) {
             productoElemento.innerHTML = `
@@ -124,7 +119,6 @@ socket.on('producto-agregado', (producto) => {
         }
     });
 
-    // Manejar el envío del formulario
     const form = document.getElementById('form-agregar-producto');
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -146,7 +140,6 @@ socket.on('producto-agregado', (producto) => {
         }
     });
 
-    // Manejar eliminación de productos
     document.addEventListener('click', async (e) => {
         if (e.target.classList.contains('eliminar-producto')) {
             const code = e.target.dataset.code;
@@ -157,7 +150,6 @@ socket.on('producto-agregado', (producto) => {
         }
     });
 
-    // Manejar modificación de productos
     document.addEventListener('click', async (e) => {
         if (e.target.classList.contains('modificar-producto')) {
             const code = e.target.dataset.code;
