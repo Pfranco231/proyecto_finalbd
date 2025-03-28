@@ -1,0 +1,133 @@
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Gestión de Carritos</h1>
+
+    <!-- Lista de carritos -->
+    <ul id="carritos-lista" class="list-group">
+        {{#each carritos}}
+        <li id="carrito-{{_id}}" class="list-group-item">
+            <strong>Carrito ID:</strong> {{_id}} <br>
+            <strong>Total:</strong> ${{total}} <br>
+            <strong>Productos:</strong>
+            <ul>
+                {{#each productos}}
+                <li>{{nombre}} - ${{precio}} x {{cantidad}} = ${{total}}</li>
+                {{/each}}
+            </ul>
+            <button class="btn btn-danger eliminar-carrito" data-id="{{_id}}">Eliminar</button>
+            <button class="btn btn-primary modificar-carrito" data-id="{{_id}}">Modificar</button>
+        </li>
+        {{/each}}
+    </ul>
+
+    <!-- Formulario para crear carritos -->
+    <h2 class="mt-5">Crear Carrito</h2>
+    <form id="form-crear-carrito" class="row g-3">
+        <div class="col-12">
+            <label for="productos" class="form-label">Seleccionar Productos</label>
+            <ul class="list-group">
+                {{#each productos}}
+                <li class="list-group-item">
+                    <input type="checkbox" name="productos" value="{{code}}" data-precio="{{price}}">
+                    {{title}} - ${{price}}
+                    <label for="cantidad-{{code}}" class="form-label">Cantidad:</label>
+                    <input type="number" id="cantidad-{{code}}" name="cantidad-{{code}}" class="form-control d-inline-block w-25" min="1" value="1">
+                </li>
+                {{/each}}
+            </ul>
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-success">Crear Carrito</button>
+        </div>
+    </form>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+
+    // Verificar conexión con el servidor de WebSockets
+    socket.on('connect', () => {
+        console.log('Conectado al servidor de WebSockets:', socket.id);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Desconectado del servidor de WebSockets');
+    });
+
+    // Escuchar eventos de WebSocket
+    socket.on('carrito-creado', (carrito) => {
+        console.log('Evento carrito-creado recibido:', carrito);
+        const lista = document.getElementById('carritos-lista');
+        const nuevoCarrito = document.createElement('li');
+        nuevoCarrito.id = `carrito-${carrito._id}`;
+        nuevoCarrito.classList.add('list-group-item');
+        nuevoCarrito.innerHTML = `
+            <strong>Carrito ID:</strong> ${carrito._id} <br>
+            <strong>Total:</strong> $${carrito.total} <br>
+            <strong>Productos:</strong>
+            <ul>
+                ${carrito.productos.map(p => `<li>${p.nombre} - $${p.precio} x ${p.cantidad} = $${p.precio * p.cantidad}</li>`).join('')}
+            </ul>
+            <button class="btn btn-danger eliminar-carrito" data-id="${carrito._id}">Eliminar</button>
+        `;
+        lista.appendChild(nuevoCarrito);
+    });
+
+
+    socket.on('carrito-eliminado', (carrito) => {
+        console.log('Evento carrito-eliminado recibido:', carrito);
+        const carritoElemento = document.getElementById(`carrito-${carrito._id}`);
+        if (carritoElemento) {
+            carritoElemento.remove();
+        }
+    });
+
+    // Manejar creación de carritos
+    const formCrearCarrito = document.getElementById('form-crear-carrito');
+    formCrearCarrito.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const productosSeleccionados = Array.from(formCrearCarrito.querySelectorAll('input[name="productos"]:checked')).map((checkbox) => {
+            const code = checkbox.value;
+            const cantidad = parseInt(formCrearCarrito.querySelector(`input[name="cantidad-${code}"]`).value, 10);
+            return { code, cantidad };
+        });
+
+        try {
+            const response = await fetch('/carritos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productos: productosSeleccionados })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error al crear el carrito: ${response.statusText}`);
+            }
+
+            console.log('Carrito creado correctamente');
+        } catch (error) {
+            console.error(error);
+            alert('Error al crear el carrito');
+        }
+    });
+
+    // Manejar eliminación de carritos
+    document.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('eliminar-carrito')) {
+            const id = e.target.dataset.id;
+
+            try {
+                const response = await fetch(`/carritos/${id}`, { method: 'DELETE' });
+
+                if (!response.ok) {
+                    throw new Error(`Error al eliminar el carrito: ${response.statusText}`);
+                }
+
+                console.log('Carrito eliminado correctamente');
+            } catch (error) {
+                console.error(error);
+                alert('Error al eliminar el carrito');
+            }
+        }
+    });
+</script>

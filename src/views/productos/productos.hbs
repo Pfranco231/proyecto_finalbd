@@ -1,0 +1,177 @@
+<!-- filepath: c:\Users\papes\Desktop\proyecto-final\api-productos-carritos\src\views\productos\productos.hbs -->
+<div class="container mt-5">
+    <h1 class="text-center mb-4">{{titulo}}</h1>
+
+    <!-- Lista de productos -->
+    <div class="row">
+        {{#each productos}}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <img src="{{thumbnails.[0]}}" class="card-img-top" alt="{{title}}" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">{{title}}</h5>
+                    <p class="card-text">{{description}}</p>
+                    <p><strong>Precio:</strong> ${{price}}</p>
+                    <p><strong>Categoría:</strong> {{category}}</p>
+                    <p><strong>Stock:</strong> {{stock}}</p>
+                    <p><strong>Código:</strong> {{code}}</p>
+                    <button class="btn btn-danger eliminar-producto" data-code="{{code}}">Eliminar</button>
+                    <button class="btn btn-primary modificar-producto" data-code="{{code}}">Modificar</button>
+                </div>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+
+    <!-- Formulario para agregar productos -->
+    <h2 class="mt-5">Agregar Producto</h2>
+    <form id="form-agregar-producto" class="row g-3">
+        <div class="col-md-6">
+            <label for="title" class="form-label">Título</label>
+            <input type="text" id="title" name="title" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+            <label for="description" class="form-label">Descripción</label>
+            <textarea id="description" name="description" class="form-control" required></textarea>
+        </div>
+        <div class="col-md-6">
+            <label for="code" class="form-label">Código</label>
+            <input type="text" id="code" name="code" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+            <label for="price" class="form-label">Precio</label>
+            <input type="number" id="price" name="price" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+            <label for="stock" class="form-label">Stock</label>
+            <input type="number" id="stock" name="stock" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+            <label for="category" class="form-label">Categoría</label>
+            <input type="text" id="category" name="category" class="form-control" required>
+        </div>
+        <div class="col-md-12">
+            <label for="thumbnails" class="form-label">Imágenes (URLs separadas por comas)</label>
+            <input type="text" id="thumbnails" name="thumbnails" class="form-control">
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-success">Agregar Producto</button>
+        </div>
+    </form>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+
+socket.on('producto-agregado', (producto) => {
+        console.log('Evento producto-agregado recibido:', producto);
+
+        // Selecciona el contenedor de productos
+        const lista = document.querySelector('.row'); // Asegúrate de que este selector coincida con el contenedor en tu HTML
+        const nuevoProducto = document.createElement('div');
+        nuevoProducto.classList.add('col-md-4', 'mb-4');
+        nuevoProducto.innerHTML = `
+            <div class="card shadow-sm">
+                <img src="${producto.thumbnails[0]}" class="card-img-top" alt="${producto.title}" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">${producto.title}</h5>
+                    <p class="card-text">${producto.description}</p>
+                    <p><strong>Precio:</strong> $${producto.price}</p>
+                    <p><strong>Categoría:</strong> ${producto.category}</p>
+                    <p><strong>Stock:</strong> ${producto.stock}</p>
+                    <p><strong>Código:</strong> ${producto.code}</p>
+                    <button class="btn btn-danger eliminar-producto" data-code="${producto.code}">Eliminar</button>
+                    <button class="btn btn-primary modificar-producto" data-code="${producto.code}">Modificar</button>
+                </div>
+            </div>
+        `;
+        lista.appendChild(nuevoProducto);
+    });
+
+    socket.on('producto-eliminado', (producto) => {
+        console.log('Evento producto-eliminado recibido:', producto);
+
+        // Selecciona el producto por su código
+        const productoElemento = document.querySelector(`[data-code="${producto.code}"]`).closest('.col-md-4');
+        if (productoElemento) {
+            productoElemento.remove();
+        }
+    });
+
+
+    socket.on('producto-modificado', (producto) => {
+        console.log('Evento producto-modificado recibido:', producto);
+
+        // Selecciona el producto por su código
+        const productoElemento = document.querySelector(`[data-code="${producto.code}"]`).closest('.col-md-4');
+        if (productoElemento) {
+            productoElemento.innerHTML = `
+                <div class="card shadow-sm">
+                    <img src="${producto.thumbnails[0]}" class="card-img-top" alt="${producto.title}" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">${producto.title}</h5>
+                        <p class="card-text">${producto.description}</p>
+                        <p><strong>Precio:</strong> $${producto.price}</p>
+                        <p><strong>Categoría:</strong> ${producto.category}</p>
+                        <p><strong>Stock:</strong> ${producto.stock}</p>
+                        <p><strong>Código:</strong> ${producto.code}</p>
+                        <button class="btn btn-danger eliminar-producto" data-code="${producto.code}">Eliminar</button>
+                        <button class="btn btn-primary modificar-producto" data-code="${producto.code}">Modificar</button>
+                    </div>
+                </div>
+            `;
+        }
+    });
+
+    // Manejar el envío del formulario
+    const form = document.getElementById('form-agregar-producto');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        data.thumbnails = data.thumbnails ? data.thumbnails.split(',').map(url => url.trim()) : [];
+
+        const response = await fetch('/productos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            form.reset();
+        } else {
+            alert('Error al agregar el producto');
+        }
+    });
+
+    // Manejar eliminación de productos
+    document.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('eliminar-producto')) {
+            const code = e.target.dataset.code;
+            const response = await fetch(`/productos/${code}`, { method: 'DELETE' });
+            if (!response.ok) {
+                alert('Error al eliminar el producto');
+            }
+        }
+    });
+
+    // Manejar modificación de productos
+    document.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('modificar-producto')) {
+            const code = e.target.dataset.code;
+            const nuevosDatos = prompt('Ingrese los nuevos datos en formato JSON (ejemplo: {"price": 500, "stock": 20})');
+            if (nuevosDatos) {
+                const response = await fetch(`/productos/${code}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: nuevosDatos
+                });
+                if (!response.ok) {
+                    alert('Error al modificar el producto');
+                }
+            }
+        }
+    });
+</script>
